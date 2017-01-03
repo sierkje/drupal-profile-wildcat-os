@@ -1,0 +1,23 @@
+name: "Wildcat OS"
+type: profile
+description: 'Install Drupal with commonly used features for community organizing pre-configured.'
+core: 8.x
+distribution:
+  name: "Wildcat, an Organizer's Starterkit"
+
+# DEPENDENCIES
+# 'Hard' dependencies are added dynamically using Wildcat's Flavor Manager. At
+# least one modules will be added as a required dependency that cannot be
+# uninstalled the 'wildcat' modules. That modules will add the necessary, initial
+# configuration and perform other install and update tasks that are usually
+# performed when the functions in the profile's .install file are called.
+# Additional 'hard' dependencies, besides the 'wildcat' modules, may be added by
+# specifying them as 'required' modules in 'wildcat.flavor.yml' files.
+dependencies:
+  - wildcat
+
+# THEMES
+# The default and admin theme are dynamically set and enabled using the Flavor
+# Manager. By default, 'chairman_meow' is used as the default theme and 'seven'
+# as the admin theme. Another default and/or admin theme may be enabled instead,
+# by using 'wildcat.flavor.yml' files.

@@ -1,0 +1,27 @@
+{
+  "name": "drupal/wildcat_os",
+  "description": "Organizer's starterkit. A base install profile that can be flavored to your liking.",
+  "type": "drupal-profile",
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "Sierk Beij",
+      "email": "sierk@cococollective.org"
+    }
+  ],
+  "extra": {
+    "branch-alias": {
+      "dev-8.x-0.x": "0.0.x-dev"
+    }
+  },
+  "require": {
+    "drupal/core": "^8.2.0",
+    "drupal/float_left": "~0.0",
+    "drupal/wildcat": "~0.0",
+    "drupal/wildcat_landing_page": "~0.0",
+    "drupal/wildcat_layout": "~0.0",
+    "drupal/wildcat_media": "~0.0"
+  }
+}

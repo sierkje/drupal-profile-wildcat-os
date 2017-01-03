@@ -1,0 +1,152 @@
+# LET'S ORGANIZE CUSTOM FLAVOR DEFINITION
+# -----------------------------------------------------------------------------
+#
+# Used for defining a custom flavor of the Wildcat installation profile.
+#
+# Custom flavors are distributions of the Wildcat profile with Drupal
+# wildcat, that enable a different set of modules on install, use a different
+# default and/or admin theme, and/or override the first wildcat_page that the user sees
+# after installing a Wildcat site.
+#
+# @todo Add additional documentation: how to use these files, etc.
+#
+# -----------------------------------------------------------------------------
+# BASE FLAVOR
+# -----------------------------------------------------------------------------
+# Optional name of a base flavor. Used for defining the starting point (modules,
+# themes, and redirect) that should be used for this custom flavor:
+# - currently only 'standard' and 'minimal' are valid as base flavors,
+# - if the base_flavor is not set, or is empty, the 'standard' base flavor will
+#   be used.
+#
+# Examples:
+#
+# base flavor: ''
+# base flavor: 'standard'
+#   If 'standard' is used as the base flavor:
+#   - the 'wildcat' modules will be added as a 'required' modules
+#     (always enabled, cannot be excluded),
+#   - other (non-experimental) modules that are commonly enabled for Wildcat
+#     sites will be added as 'recommended' modules (these modules will be
+#     enabled, unless they are 'excluded' in a wildcat.flavor.yml),
+#   - '<front>' will be used as the post-installation redirect (unless another
+#     redirect is specified in a wildcat.flavor.yml file),
+#   - 'seven' will be used as admin theme (unless another theme is specified in
+#     a wildcat.flavor.yml file),
+#   - 'wildcat' will be used as the default theme (unless another theme is
+#     specified in a wildcat.flavor.yml file).
+#
+# base flavor: 'minimal'
+#   If 'minimal' is used as the base flavor:
+#   - the 'wildcat' modules will be added as a 'required' modules
+#     (always enabled, cannot be excluded),
+#   - no other modules will be added (unless they are 'required' or
+#     'recommended' in a wildcat.flavor.yml),
+#   - '<front>' will be used as the post-installation redirect (unless another
+#     redirect is specified in a wildcat.flavor.yml file),
+#   - 'seven' will be used as admin theme (unless another theme is specified in
+#     a wildcat.flavor.yml file),
+#   - 'wildcat' will be used as the default theme (unless another theme is
+#     specified in a wildcat.flavor.yml file).
+base_flavor: ''
+#
+# -----------------------------------------------------------------------------
+# IGNORE INSTALLATION FLAVOR
+# -----------------------------------------------------------------------------
+# Optional boolean that indicates whether a "site" specific flavor, extends the
+# "installation"-wide flavor:
+# - if ignore_installation_flavor is set to 1, the "site" specific flavor will
+#   ignore the contents of any "installation" flavor file and directly extend
+#   the base flavor definition,
+# - if ignore_installation_flavor is not set, or is set to something other than
+#   1 or '1', the "installation" flavor, if available, will NOT be ignored,
+# - setting ignore_installation_flavor will only have effect if both a "site"
+#   and "installation" file are available,
+# - setting ignore_installation_flavor is only useful in a "site" file, setting
+#   ignore_installation_flavor in an "installation" file does not change the
+#   way a "site" specific flavor is processed in any way.
+ignore_installation_flavor: 0
+#
+# -----------------------------------------------------------------------------
+# MODULES
+# -----------------------------------------------------------------------------
+# Optional. Used to define which modules should and should not be enabled when
+# a Wildcat site is installed:
+# - use 'require' for modules that are hard dependencies (see example below),
+# - use 'recommend' for modules that are usually enabled but that are not
+#   required (see example below),
+# - use 'exclude' to specify which modules, that are 'recommended' either by the
+#   base flavor or in another wildcat.flavor.yml file, should not be
+#   enabled.
+# (Note that modules that 'excluding' is only possible for modules that are
+# 'recommended'. Modules that are 'required', by either the base flavor or in
+# any wildcat.flavor.yml file, cannot be 'excluded'.)
+modules:
+  # MODULES: REQUIRE
+  #
+  # Optional. Used for modules that are hard dependencies (and cannot be
+  # excluded.)
+  #
+  # Example:
+  #
+  # @todo Needs example.
+  require: [  ]
+  # MODULES: RECOMMEND
+  #
+  # Optional. Used to define which modules should usually be enabled but are not
+  # required (i.e. these modules may be 'excluded', see below).
+  #
+  # Example:
+  #
+  # @todo Needs example.
+  recommend: [  ]
+  # MODULES: Exclude
+  #
+  # Optional. Used to define which 'recommended' modules should not be enabled.
+  #
+  # Example:
+  #
+  # @todo Needs example.
+  exclude: [  ]
+#
+# -----------------------------------------------------------------------------
+# POST INSTALL REDIRECT
+# -----------------------------------------------------------------------------
+# Optional. Used to specify the wildcat_page the user is redirected to when the site
+# installation is completed. If no redirect is specified, or its value is empty,
+# the redirect defined for the base flavor is used.
+#
+# Example:
+#
+# @todo Needs example.
+post_install_redirect: ''
+#
+# -----------------------------------------------------------------------------
+# ADMIN THEME
+# -----------------------------------------------------------------------------
+# Optional. Used to override the administrative theme that is used:
+# - if theme_admin is not specified, or the value is empty, the admin theme
+#   specified by the base flavor (see above) is used,
+# - if a custom admin theme is specified, a custom modules that provides the
+#   necessary theme configuration (i.e. block config) is usually needed, that
+#   custom modules should be listed as a required modules (see above).
+#
+# Example:
+#
+# @todo Needs example.
+theme_admin: ''
+#
+# -----------------------------------------------------------------------------
+# DEFAULT THEME
+# -----------------------------------------------------------------------------
+# Optional. Used to override the default theme that is used for the site:
+# - if theme_default is not specified, or the value is empty, the default theme
+#   specified by the base flavor (see above) is used,
+# - if a custom default theme is specified, a custom modules that provides the
+#   necessary theme configuration (i.e. block config) is usually needed, that
+#   custom modules should be listed as a required modules (see above).
+#
+# Example:
+#
+# @todo Needs example.
+theme_default: ''

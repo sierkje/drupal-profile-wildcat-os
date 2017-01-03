@@ -1,0 +1,112 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Wildcat sites.
+ */
+
+use Drupal\user\Entity\Role;
+use Drupal\user\Entity\User;
+use Drupal\user\RoleInterface;
+use Drupal\shortcut\Entity\Shortcut;
+
+/**
+ * Implements hook_install().
+ *
+ * @todo Move most of this to submodules.
+ */
+function wildcat_os_install() {
+  // We will conditionally add permissions for some roles, they should be loaded
+  // at the begin of this install hook and should be saved at the end.
+  $role_anonymous  = Role::load(RoleInterface::ANONYMOUS_ID);
+  $role_authenticated  = Role::load(RoleInterface::AUTHENTICATED_ID);
+
+  // We might install some menu links, so we have to rebuild the router, to
+  // ensure the menu links are valid.
+  \Drupal::service('router.builder')
+    ->rebuildIfNeeded();
+
+  // Assign user 1 the "administrator" role.
+  $user_one = User::load(1);
+  $user_one->addRole('administrator');
+  $user_one->save();
+
+  // Allow visitor account creation with administrative approval.
+  \Drupal::configFactory()->getEditable('user.settings')
+    ->set('register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)
+    ->save(TRUE);
+
+  // Set defaults for the Comment modules, if it is installed.
+  if (\Drupal::moduleHandler()->moduleExists('comment')) {
+    $role_anonymous
+      ->grantPermission('access comments');
+    $role_authenticated
+      ->grantPermission('access comments')
+      ->grantPermission('post comments')
+      ->grantPermission('skip comment approval');
+  }
+
+  // Set defaults for the Contact modules, if it is installed.
+  if (\Drupal::moduleHandler()->moduleExists('contact')) {
+    $role_anonymous
+      ->grantPermission('access site-wide contact form');
+    $role_authenticated
+      ->grantPermission('access site-wide contact form');
+
+    // Enable the Contact link in the footer menu.
+    \Drupal::service('plugin.manager.menu.link')
+      ->updateDefinition('contact.site_page', ['enabled' => TRUE]);
+  }
+
+  // Set defaults for the Node modules, if it is installed.
+  if (\Drupal::moduleHandler()->moduleExists('node')) {
+    // Enable the admin theme for node add/edit pages.
+    \Drupal::configFactory()->getEditable('node.settings')
+      ->set('use_admin_theme', TRUE)
+      ->save(TRUE);
+
+    // Set front wildcat_page to "node".
+    \Drupal::configFactory()->getEditable('system.site')
+      ->set('wildcat_page.front', '/node')
+      ->save(TRUE);
+  }
+
+  // Set defaults for the Shortcut modules, if it is installed.
+  if (\Drupal::moduleHandler()->moduleExists('shortcut')) {
+    // Allow authenticated users to use shortcuts.;
+    $role_authenticated
+      ->grantPermission('access shortcuts');
+
+    // Add the 'Content overview' shortcut to the default set.
+    Shortcut::create([
+      'shortcut_set' => 'default',
+      'title' => t('All content'),
+      'weight' => -19,
+      'link' => ['uri' => 'internal:/admin/content'],
+    ])->save();
+
+    // If 'node' is enabled, add the 'add content' shortcut to the default set.
+    if (\Drupal::moduleHandler()->moduleExists('node')) {
+      Shortcut::create([
+        'shortcut_set' => 'default',
+        'title' => t('Add content'),
+        'weight' => -20,
+        'link' => ['uri' => 'internal:/node/add'],
+      ])->save();
+    }
+  }
+
+  // Set defaults for the Search modules, if it is installed.
+  if (\Drupal::moduleHandler()->moduleExists('search')) {
+    // Allow all users to use search.;
+    $role_anonymous
+      ->grantPermission('search content');
+    $role_authenticated
+      ->grantPermission('search content');
+  }
+
+  // We conditionally added permissions for some roles, they should be loaded at
+  // the begin of this install hook and should be saved at the end.
+  $role_anonymous->save();
+  $role_authenticated->save();
+}
