@@ -1,4 +1,4 @@
-# Wildcat
+# Wildcat (Organizer's Starterkit)
 
 A Drupal 8 install profile for volunteer-based community organizing.
 
