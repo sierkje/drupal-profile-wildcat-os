@@ -71,7 +71,6 @@ base_flavor: ''
 # 'recommended'. Modules that are 'required', by either the base flavor or in
 # any wildcat.flavor.yml file, cannot be 'excluded'.)
 modules:
-
   # MODULES: REQUIRE
   #
   # Optional. Used for modules that are hard dependencies (and cannot be
