@@ -2,6 +2,7 @@ name: "Wildcat OS"
 type: profile
 description: 'Install Drupal with commonly used features for community organizing pre-configured.'
 core: 8.x
+php: "7.0.0"
 distribution:
   name: "Wildcat, an Organizer's Starterkit"
 
