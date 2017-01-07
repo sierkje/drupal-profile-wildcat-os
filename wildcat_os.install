@@ -27,6 +27,7 @@ function wildcat_os_install() {
     ->rebuildIfNeeded();
 
   // Assign user 1 the "administrator" role.
+  /** @var \Drupal\user\UserInterface $user_one */
   $user_one = User::load(1);
   $user_one->addRole('administrator');
   $user_one->save();
