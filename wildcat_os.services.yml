@@ -1,7 +1,5 @@
 services:
-  wildcat_os.flavor_manager:
-    # Should implement \Drupal\wildcat_os\FlavorManagerInterface
-    class: '\Drupal\wildcat_os\FlavorManager'
-    arguments:
-      - '@app.root'
-      - '@site.path'
+  wildcat_os.flavor:
+    class: Drupal\wildcat_os\WildcatOsFlavor
+    arguments: ['@app.root', '@site.path', '@state']
+    lazy: true

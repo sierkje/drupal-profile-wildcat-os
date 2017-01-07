@@ -9,6 +9,7 @@
  */
 
 use Drupal\Core\Link;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_install_tasks().
@@ -53,27 +54,24 @@ function wildcat_os_install_tasks_alter(array &$tasks) {
  *
  * @param array $install_state
  *   The current install state.
- *
- * @return array
- *   The batch job definition.
  */
 function wildcat_os_pick_flavor(array &$install_state) {
-  /** @var \Drupal\wildcat_os\FlavorManagerInterface $flavor_manager */
-  $flavor_manager = \Drupal::service('wildcat_os.flavor_manager');
+  /** @var \Drupal\wildcat_os\WildcatOsFlavorInterface $flavor */
+  $flavor = \Drupal::service('wildcat_os.flavor');
 
-  // Add the modules discover by the flavor manager to Drupal's default modules.
-  /** @var array $drupal_modules */
   $modules = $install_state['profile_info']['dependencies'];
-  $modules = array_merge($modules, $flavor_manager->getModules());
+  $modules = array_merge($modules, $flavor->get()['modules']['require']);
+  $modules = array_merge($modules, $flavor->get()['modules']['recommend']);
   $install_state['profile_info']['dependencies'] = $modules;
   // Remove 'system', before setting state, as in install_base_system().
   $modules = array_diff($modules, ['system']);
   \Drupal::state()->set('install_profile_modules', $modules);
 
-  // Add the themes discovered by the flavor manager.
-  $themes[] = $flavor_manager->getThemeAdmin();
-  $themes[] = $flavor_manager->getThemeDefault();
+  $themes[] = $flavor->get()['theme_admin'];
+  $themes[] = $flavor->get()['theme_default'];
   $install_state['profile_info']['themes'] = array_unique($themes);
+
+  $install_state['wildcat_redirect'] = $flavor->get()['post_install_redirect'];
 }
 
 /**
@@ -87,21 +85,17 @@ function wildcat_os_pick_flavor(array &$install_state) {
  *   extender is configured with one.
  */
 function wildcat_os_redirect(array &$install_state) {
-  /** @var \Drupal\wildcat_os\FlavorManagerInterface $flavor_manager */
-  $flavor_manager = \Drupal::service('wildcat_os.flavor_manager');
-  $redirect = $flavor_manager->getPostInstallRedirect();
-
+  $link_text = t('you can proceed to your site now');
+  $link_url = Url::fromUri($install_state['wildcat_redirect']);
   // The installer doesn't make it easy (possible?) to return a redirect
   // response, so set a redirection META tag in the output.
   $redirect_meta = [
     '#tag' => 'meta',
     '#attributes' => [
       'http-equiv' => 'refresh',
-      'content' => "0;url={$redirect->getUri()}",
+      'content' => "0;url={$install_state['wildcat_redirect']}",
     ],
   ];
-
-  $redirect_link_text = t('you can proceed to your site now');
 
   return [
     '#title' => t('Start organizing!'),
@@ -109,14 +103,14 @@ function wildcat_os_redirect(array &$install_state) {
       '#prefix' => '<p>',
       '#suffix' => '</p>',
       '#markup' => t('Your <em>@wildcat</em> site is ready to go!', [
-        '@wildcat' => "Wildcat",
+        '@wildcat' => 'Wildcat-flavored',
       ]),
     ],
     'proceed_link' => [
       '#prefix' => '<p>',
       '#suffix' => '</p>',
       '#markup' => t('If you are not redirected in 5 seconds, @proceed_link.', [
-        '@proceed_link' => Link::fromTextAndUrl($redirect_link_text, $redirect),
+        '@proceed_link' => Link::fromTextAndUrl($link_text, $link_url),
       ]),
       '#attached' => [
         'http_header' => [['Cache-Control', 'no-cache']],
