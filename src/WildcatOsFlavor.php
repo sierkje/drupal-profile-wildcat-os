@@ -103,6 +103,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
     // Add base flavor modules to the recommends.
     $recommend = ($base === 'minimal') ? [] : [
+      'wildcat_content_role',
       'wildcat_landing_page',
       'wildcat_layout',
       'wildcat_media',

@@ -20,6 +20,7 @@
     "drupal/core": "^8.2.0",
     "drupal/float_left": "~0.0",
     "drupal/wildcat": "~0.0",
+    "drupal/wildcat_content_role": "~0.0",
     "drupal/wildcat_landing_page": "~0.0",
     "drupal/wildcat_layout": "~0.0",
     "drupal/wildcat_media": "~0.0"

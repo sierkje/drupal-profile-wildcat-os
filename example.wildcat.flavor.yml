@@ -32,7 +32,8 @@
 #   - other (non-experimental) modules that are commonly enabled for Wildcat
 #     sites will be added as 'recommended' modules (these modules will be
 #     enabled, unless they are specified as 'excluded' modules in one of the
-#     wildcat.flavor.yml files),
+#     wildcat.flavor.yml files). (The list of recommended modules can be found
+#     in the \Drupal\wildcat_os\WildcatOsFlavor::discoverFlavor() method.)
 #   - 'seven' will be used as admin theme (unless a 'theme_admin' is specified
 #     in one of the wildcat.flavor.yml files),
 #   - 'wildcat' will be used as the default theme (unless a 'theme_default' is
