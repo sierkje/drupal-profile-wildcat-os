@@ -221,7 +221,9 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
           };
 
           foreach (['require', 'recommend', 'exclude'] as $type) {
-            $flavor['modules'][$type] = $find_modules($raw['modules'][$type]);
+            if (!empty($raw['modules'][$type])) {
+              $flavor['modules'][$type] = $find_modules($raw['modules'][$type]);
+            }
           }
         }
 
