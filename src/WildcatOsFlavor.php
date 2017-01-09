@@ -140,8 +140,9 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     $redirect = $install['post_install_redirect'] ?: $redirect;
     // But use the redirect from the 'site' file, if there is one.
     $redirect = $site['post_install_redirect'] ?: $redirect;
+    $redirect = "internal:/$redirect";
 
-    $this->flavor = [
+      $this->flavor = [
       'modules' => [
         'require' => $require,
         'recommend' => $recommend,
