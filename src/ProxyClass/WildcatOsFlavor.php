@@ -72,7 +72,7 @@ namespace Drupal\wildcat_os\ProxyClass {
          */
         public function get($rebuild = FALSE)
         {
-            return $this->lazyLoadItself()->getFlavor($rebuild );
+            return $this->lazyLoadItself()->get($rebuild );
         }
 
     }
