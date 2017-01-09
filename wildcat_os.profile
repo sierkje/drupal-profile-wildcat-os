@@ -10,6 +10,7 @@
 
 use Drupal\Core\Link;
 use Drupal\Core\Url;
+use Drupal\wildcat_os\WildcatOsFlavor;
 
 /**
  * Implements hook_install_tasks().
@@ -57,7 +58,11 @@ function wildcat_os_install_tasks_alter(array &$tasks) {
  */
 function wildcat_os_pick_flavor(array &$install_state) {
   /** @var \Drupal\wildcat_os\WildcatOsFlavorInterface $flavor */
-  $flavor = \Drupal::service('wildcat_os.flavor');
+  // $flavor = \Drupal::service('wildcat_os.flavor');
+  $app_root = \Drupal::service('app.root');
+  $site_path = \Drupal::service('site.path');
+  $state = \Drupal::service('state');
+  $flavor = new WildcatOsFlavor($app_root, $site_path, $state);
 
   $modules = $install_state['profile_info']['dependencies'];
   $modules = array_merge($modules, $flavor->get()['modules']['require']);
