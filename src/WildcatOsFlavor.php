@@ -226,7 +226,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
         }
 
         // Only pass on 'theme_admin' if it is a non-empty string.
-        if (!empty($raw['theme_admin'] && is_string($raw['theme_admin']))) {
+        if (!empty($raw['theme_admin']) && is_string($raw['theme_admin'])) {
           $flavor['theme_admin'] = $raw['theme_admin'];
         }
 
