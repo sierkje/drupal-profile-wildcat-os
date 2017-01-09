@@ -18,7 +18,9 @@ use Drupal\shortcut\Entity\Shortcut;
 function wildcat_os_install() {
   // We will conditionally add permissions for some roles, they should be loaded
   // at the begin of this install hook and should be saved at the end.
+  /** @var \Drupal\user\RoleInterface $role_anonymous */
   $role_anonymous  = Role::load(RoleInterface::ANONYMOUS_ID);
+  /** @var \Drupal\user\RoleInterface $role_authenticated */
   $role_authenticated  = Role::load(RoleInterface::AUTHENTICATED_ID);
 
   // We might install some menu links, so we have to rebuild the router, to
