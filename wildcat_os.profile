@@ -21,6 +21,9 @@ function wildcat_os_install_tasks() {
       // @todo Does this need a form? So users can disable optional modules now?
       'display' => FALSE,
     ],
+    'wildcat_os_install_themes' => [
+      'function' => 'install_profile_themes',
+    ]
   ];
 }
 
@@ -28,21 +31,9 @@ function wildcat_os_install_tasks() {
  * Implements hook_install_tasks_alter().
  */
 function wildcat_os_install_tasks_alter(array &$tasks) {
-  // First rearrange the order the install tasks, because the list of modules
-  // and themes that should be installed is available when using our 'flavor
-  // picking' task (in other words: install_profile_modules() should be called
-  // AFTER wildcat_os_pick_flavor() is called).
-  $flavor_picking_task = $tasks['wildcat_os_pick_flavor'];
-  unset($tasks['wildcat_os_pick_flavor']);
-  $original_tasks = $tasks;
-  $new_tasks = [];
-  foreach ($original_tasks as $task_name => $task_info) {
-    if ($task_name === 'install_profile_modules') {
-      $new_tasks['wildcat_os_pick_flavor'] = $flavor_picking_task;
-    }
-    $task[$task_name] = $task_info;
-  }
-  $tasks = $new_tasks;
+  // We do not know the theme yet, so we do this later.
+  $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
+  $tasks['install_profile_themes']['display'] = FALSE;
 
   // Use a custom redirect callback, in case a custom redirect is specified.
   $tasks['install_finished']['function'] = 'wildcat_os_redirect';
