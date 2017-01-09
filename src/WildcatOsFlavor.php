@@ -94,8 +94,6 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
     // Add the wildcat module to the requires, it is always required.
     $require = ['wildcat'];
-    // Add modules required by the 'base_flavor' to the requires.
-    $require = array_merge($require, $base['modules']['require']);
     // Add modules required in the 'installation' file to the requires.
     $require = array_merge($require, $install['modules']['require']);
     // Add modules required in the 'site' file to the requires.
@@ -126,8 +124,6 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
     // Use, by default, 'seven' as the admin theme.
     $theme_admin = 'seven';
-    // But use the admin theme from the 'base_flavor', if there is one.
-    $theme_admin = $base['theme_admin'] ?: $theme_admin;
     // But use the admin theme from the 'installation' file, if there is one.
     $theme_admin = $install['theme_admin'] ?: $theme_admin;
     // But use the admin theme from the 'site' file, if there is one.
@@ -135,17 +131,11 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
     // Use, by default, 'float_left' as the default theme.
     $theme_default = 'float_left';
-    // But use the default theme from the 'base_flavor', if there is one.
-    $theme_default = $base['theme_default'] ?: $theme_default;
-    // But use the default theme from the 'installation' file, if there is one.
-    $theme_default = $install['theme_default'] ?: $theme_default;
     // But use the default theme from the 'site' file, if there is one.
     $theme_default = $site['theme_default'] ?: $theme_default;
 
     // Use, as default, the front page as the post installation redirect.
     $redirect = '<front>';
-    // But use the redirect from the 'base_flavor', if there is one.
-    $redirect = $base['post_install_redirect'] ?: $redirect;
     // But use the redirect from the 'installation' file, if there is one.
     $redirect = $install['post_install_redirect'] ?: $redirect;
     // But use the redirect from the 'site' file, if there is one.
