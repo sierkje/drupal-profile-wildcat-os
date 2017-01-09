@@ -82,7 +82,7 @@ function wildcat_os_pick_flavor(array &$install_state) {
  */
 function wildcat_os_redirect(array &$install_state) {
   $link_text = t('you can proceed to your site now');
-  $link_url = Url::fromUri($install_state['wildcat_redirect']);
+  $link_url = Url::fromUserInput($install_state['wildcat_redirect']);
   // The installer doesn't make it easy (possible?) to return a redirect
   // response, so set a redirection META tag in the output.
   $redirect_meta = [
