@@ -40,14 +40,14 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
   /**
    * Constructs a new WildcatOsWildcatOsFlavor.
    *
-   * @param \SplString $app_root
+   * @param string $app_root
    *   The path to the Drupal root.
-   * @param \SplString $site_path
+   * @param string $site_path
    *   The path to the site's configuration (e.g. sites/default).
    * @param \Drupal\Core\State\StateInterface $state
    *   The state backend.
    */
-  public function __construct(\SplString $app_root, \SplString $site_path, StateInterface $state) {
+  public function __construct($app_root, $site_path, StateInterface $state) {
     $this->appRoot = (string) $app_root;
     $this->sitePath = (string) $site_path;
     $this->state = $state;
