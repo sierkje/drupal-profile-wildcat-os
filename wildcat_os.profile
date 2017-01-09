@@ -23,7 +23,10 @@ function wildcat_os_install_tasks() {
     ],
     'wildcat_os_install_themes' => [
       'function' => 'install_profile_themes',
-    ]
+    ],
+    'wildcat_os_set_theme_settings' => [
+      'display' => FALSE,
+    ],
   ];
 }
 
@@ -64,13 +67,40 @@ function wildcat_os_pick_flavor(array &$install_state) {
   \Drupal::state()->set('install_profile_modules', $modules);
 
   $themes[] = $flavor->get()['theme_admin'];
+  $install_state['wildcat_theme_admin'] = $flavor->get()['theme_admin'];
   $themes[] = $flavor->get()['theme_default'];
+  $install_state['wildcat_theme_default'] = $flavor->get()['theme_default'];
   $install_state['profile_info']['themes'] = array_unique($themes);
 
   $install_state['wildcat_redirect'] = $flavor->get()['post_install_redirect'];
 }
 
 /**
+ * Install task callback.
+ *
+ * Sets theme settings, including default and admin theme.
+ *
+ * @param array $install_state
+ *   The current install state.
+ */
+function wildcat_os_set_theme_settings(array &$install_state) {
+  $config_factory = \Drupal::configFactory();
+  $config_factory->getEditable('site.theme')
+    ->set('admin', $install_state['wildcat_theme_admin'])
+    ->set('default', $install_state['wildcat_theme_default'])
+    ->save(TRUE);
+
+  if (\Drupal::moduleHandler()->moduleExists('node')) {
+    // Enable the admin theme for node add/edit/etc.
+    $config_factory->getEditable('node.settings')
+      ->set('use_admin_theme', TRUE)
+      ->save(TRUE);
+  }
+}
+
+/**
+ * Install task callback.
+ *
  * Redirects the user to a particular URL after installation.
  *
  * @param array $install_state
