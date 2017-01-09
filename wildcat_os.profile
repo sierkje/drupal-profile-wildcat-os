@@ -85,7 +85,7 @@ function wildcat_os_pick_flavor(array &$install_state) {
  */
 function wildcat_os_set_theme_settings(array &$install_state) {
   $config_factory = \Drupal::configFactory();
-  $config_factory->getEditable('site.theme')
+  $config_factory->getEditable('system.theme')
     ->set('admin', $install_state['wildcat_theme_admin'])
     ->set('default', $install_state['wildcat_theme_default'])
     ->save(TRUE);
