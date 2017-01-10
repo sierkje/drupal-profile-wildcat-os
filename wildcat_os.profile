@@ -17,13 +17,11 @@ use Drupal\wildcat_os\WildcatOsFlavor;
  */
 function wildcat_os_install_tasks() {
   return [
-    'wildcat_os_pick_flavor' => [
-      // @todo Does this need a form? So users can disable optional modules now?
+    'wildcat_os_get_flavor' => [
       'display' => FALSE,
     ],
-    'wildcat_os_install_themes' => [
-      'function' => 'install_profile_themes',
-    ],
+    'wildcat_os_install_modules' => [],
+    'wildcat_os_install_themes' => [],
     'wildcat_os_set_theme_settings' => [
       'display' => FALSE,
     ],
@@ -34,37 +32,52 @@ function wildcat_os_install_tasks() {
  * Implements hook_install_tasks_alter().
  */
 function wildcat_os_install_tasks_alter(array &$tasks) {
-  // We do not know the theme yet, so we do this later.
+  $tasks['wildcat_os_install_modules'] = $tasks['install_profile_modules'];
+  $tasks['wildcat_os_install_modules']['function'] = 'wildcat_os_install_modules';
+
+  // We do not know the themes yet when Drupal wants to install them, so we need
+  // to do this later.
+  $tasks['wildcat_os_install_themes'] = $tasks['install_profile_themes'];
+  $tasks['wildcat_os_install_themes']['function'] = 'install_profile_themes';
   $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
   $tasks['install_profile_themes']['display'] = FALSE;
 
   // Use a custom redirect callback, in case a custom redirect is specified.
   $tasks['install_finished']['function'] = 'wildcat_os_redirect';
+
+  // Install flavor modules and themes immediately after profile is installed.
+  $sorted_tasks = [];
+  $module_key = 'wildcat_os_install_modules';
+  $theme_key = 'wildcat_os_install_themes';
+  foreach ($tasks as $key => $task) {
+    if (!in_array($key, [$module_key, $theme_key])) {
+      $sorted_tasks[$key] = $task;
+    }
+    if ($key === 'install_profile') {
+      $sorted_tasks[$module_key] = $tasks[$module_key];
+      $sorted_tasks[$theme_key] = $tasks[$theme_key];
+    }
+  }
+  $tasks = $sorted_tasks;
 }
 
 /**
  * Install task callback.
  *
- * Prepares batch job to install the enabled Wildcat extensions.
+ * Collects the flavor information.
  *
  * @param array $install_state
  *   The current install state.
  */
-function wildcat_os_pick_flavor(array &$install_state) {
+function wildcat_os_get_flavor(array &$install_state) {
   /** @var \Drupal\wildcat_os\WildcatOsFlavorInterface $flavor */
-  // $flavor = \Drupal::service('wildcat_os.flavor');
-  $app_root = \Drupal::service('app.root');
-  $site_path = \Drupal::service('site.path');
-  $state = \Drupal::service('state');
-  $flavor = new WildcatOsFlavor($app_root, $site_path, $state);
+  $flavor = \Drupal::service('wildcat_os.flavor');
 
-  $modules = $install_state['profile_info']['dependencies'];
-  $modules = array_merge($modules, $flavor->get()['modules']['require']);
-  $modules = array_merge($modules, $flavor->get()['modules']['recommend']);
-  $install_state['profile_info']['dependencies'] = $modules;
-  // Remove 'system', before setting state, as in install_base_system().
-  $modules = array_diff($modules, ['system']);
-  \Drupal::state()->set('install_profile_modules', $modules);
+  $already_installed = $install_state['profile_info']['dependencies'];
+  $modules = $flavor->get()['modules'];
+  $modules['require'] = array_diff($modules['require'], $already_installed);
+  $modules['recommend'] = array_diff($modules['recommend'], $already_installed);
+  $install_state['wildcat_modules'] = $modules;
 
   $themes[] = $flavor->get()['theme_admin'];
   $install_state['wildcat_theme_admin'] = $flavor->get()['theme_admin'];
@@ -75,6 +88,62 @@ function wildcat_os_pick_flavor(array &$install_state) {
   $install_state['wildcat_redirect'] = $flavor->get()['post_install_redirect'];
 }
 
+
+
+/**
+ * Install task callback.
+ *
+ * Installs flavor modules via a batch process.
+ *
+ * @param $install_state
+ *   An array of information about the current installation state.
+ *
+ * @return
+ *   The batch definition.
+ */
+function wildcat_os_install_modules(array &$install_state) {
+  $files = system_rebuild_module_data();
+  $modules = array_merge($install_state['wildcat_modules']['require'], $install_state['wildcat_modules']['recommend']);
+
+  // Always install required modules first. Respect the dependencies between
+  // the modules.
+  $required = array();
+  $non_required = array();
+
+  // Ensure that flavor required modules are recognized as required.
+  foreach ($install_state['wildcat_modules']['require'] as $module) {
+    $files[$module]->info['required'] = TRUE;
+  }
+
+  // Add modules that other modules depend on.
+  foreach ($modules as $module) {
+    if ($files[$module]->requires) {
+      $modules = array_merge($modules, array_keys($files[$module]->requires));
+    }
+  }
+  $modules = array_unique($modules);
+  foreach ($modules as $module) {
+    if (!empty($files[$module]->info['required'])) {
+      $required[$module] = $files[$module]->sort;
+    }
+    else {
+      $non_required[$module] = $files[$module]->sort;
+    }
+  }
+  arsort($required);
+  arsort($non_required);
+
+  $operations = array();
+  foreach ($required + $non_required as $module => $weight) {
+    $operations[] = array('_install_module_batch', array($module, $files[$module]->info['name']));
+  }
+  $batch = array(
+    'operations' => $operations,
+    'title' => t('Adding some flavor: installing modules.'),
+    'error_message' => t('The installation has encountered an error.'),
+  );
+  return $batch;
+}
 /**
  * Install task callback.
  *
