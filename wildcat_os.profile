@@ -10,7 +10,6 @@
 
 use Drupal\Core\Link;
 use Drupal\Core\Url;
-use Drupal\wildcat_os\WildcatOsFlavor;
 
 /**
  * Implements hook_install_tasks().
