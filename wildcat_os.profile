@@ -177,13 +177,21 @@ function wildcat_os_set_theme_settings(array &$install_state) {
 function wildcat_os_redirect(array &$install_state) {
   $link_text = t('you can proceed to your site now');
   $link_url = Url::fromUri($install_state['wildcat_redirect']);
+
+  // Explicitly set the base URL, if not previously set, to prevent weird
+  // redirection snafus.
+  $base_url = $link_url->getOption('base_url');
+  if (empty($base_url)) {
+    $link_url->setOption('base_url', $GLOBALS['base_url']);
+  }
+
   // The installer doesn't make it easy (possible?) to return a redirect
   // response, so set a redirection META tag in the output.
   $redirect_meta = [
     '#tag' => 'meta',
     '#attributes' => [
       'http-equiv' => 'refresh',
-      'content' => "0;url={$install_state['wildcat_redirect']}",
+      'content' => "0;url={$link_url->toString()}",
     ],
   ];
 
