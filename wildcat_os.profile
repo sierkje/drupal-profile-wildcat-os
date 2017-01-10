@@ -33,11 +33,13 @@ function wildcat_os_install_tasks() {
 function wildcat_os_install_tasks_alter(array &$tasks) {
   $tasks['wildcat_os_install_modules'] = $tasks['install_profile_modules'];
   $tasks['wildcat_os_install_modules']['function'] = 'wildcat_os_install_modules';
+  $tasks['wildcat_os_install_modules']['display'] = TRUE;
 
   // We do not know the themes yet when Drupal wants to install them, so we need
   // to do this later.
   $tasks['wildcat_os_install_themes'] = $tasks['install_profile_themes'];
   $tasks['wildcat_os_install_themes']['function'] = 'install_profile_themes';
+  $tasks['wildcat_os_install_themes']['display'] = TRUE;
   $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
   $tasks['install_profile_themes']['display'] = FALSE;
 
