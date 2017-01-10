@@ -64,7 +64,8 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
     // When rebuilding or no cached flavor, parse the wildcat.flavor.yml files.
     if ($rebuild || empty($this->flavor)) {
-      $this->discoverFlavor();
+      $this->flavor = $this->discoverFlavor();
+      $this->state->set('wildcat_os.flavor', $this->flavor);
     }
 
     return $this->flavor;
@@ -72,6 +73,9 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
   /**
    * Returns the flavor definition after processing wildcat.flavor.yml files.
+   *
+   * @return array
+   *   The array containing the flavor definition.
    *
    * @throws BadFlavorException
    *   When a wildcat.flavor.yml file was found but could not be processed.
@@ -135,14 +139,20 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     $theme_default = $site['theme_default'] ?: $theme_default;
 
     // Use, as default, the front page as the post installation redirect.
-    $redirect = '<front>';
+    $redirect = [
+      'path' => '<front>',
+      'options' => [],
+    ];
     // But use the redirect from the 'installation' file, if there is one.
-    $redirect = $install['post_install_redirect'] ?: $redirect;
+    if (!empty($install['post_install_redirect'])) {
+      $redirect = $install['post_install_redirect'];
+    }
     // But use the redirect from the 'site' file, if there is one.
-    $redirect = $site['post_install_redirect'] ?: $redirect;
-    $redirect = "internal:/$redirect";
+    if (!empty($site['post_install_redirect'])) {
+      $redirect = $site['post_install_redirect'];
+    }
 
-      $this->flavor = [
+    return [
       'modules' => [
         'require' => $require,
         'recommend' => $recommend,
@@ -176,7 +186,10 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
       ],
       'theme_admin' => '',
       'theme_default' => '',
-      'post_install_redirect' => '',
+      'post_install_redirect' => [
+        'path' => '',
+        'options' => '',
+      ],
     ];
 
     $filename = (string) $dir . '/wildcat.flavor.yml';
@@ -237,9 +250,17 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
           $flavor['theme_default'] = $raw['theme_default'];
         }
 
-        // Only pass on 'post_install_redirect' if it is a non-empty string.
-        if (!empty($raw['post_install_redirect']) && is_string($raw['post_install_redirect'])) {
-          $flavor['post_install_redirect'] = $raw['post_install_redirect'];
+        // Only pass on 'post_install_redirect' if it is a non-empty array.
+        if (!empty($raw['post_install_redirect']) && is_array($raw['post_install_redirect'])) {
+          $redirect = $raw['post_install_redirect'];
+          // Only pass on the redirect 'path' if it is a non-empty string.
+          if (!empty($redirect['path']) && is_string($redirect['path'])) {
+            $flavor['post_install_redirect']['path'] = $redirect['path'];
+          }
+          // Only pass on the redirect 'options' if it is a non-empty array.
+          if (!empty($redirect['options']) && is_array($redirect['options'])) {
+            $flavor['post_install_redirect']['options'] = $redirect['options'];
+          }
         }
       }
     }

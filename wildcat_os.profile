@@ -175,8 +175,10 @@ function wildcat_os_set_theme_settings(array &$install_state) {
  *   extender is configured with one.
  */
 function wildcat_os_redirect(array &$install_state) {
+  $redirect = $install_state['wildcat_redirect'];
+  $redirect['path'] = "internal:/{$redirect['path']}";
   $link_text = t('you can proceed to your site now');
-  $link_url = Url::fromUri($install_state['wildcat_redirect']);
+  $link_url = Url::fromUri($redirect['path'], $redirect['options']);
 
   // Explicitly set the base URL, if not previously set, to prevent weird
   // redirection snafus.

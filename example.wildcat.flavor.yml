@@ -80,7 +80,7 @@ modules:
   # Example:
   #
   # @todo Needs example.
-  require: [  ]
+  require: []
 
   # MODULES: RECOMMEND
   #
@@ -90,7 +90,7 @@ modules:
   # Example:
   #
   # @todo Needs example.
-  recommend: [  ]
+  recommend: []
 
   # MODULES: Exclude
   #
@@ -99,7 +99,7 @@ modules:
   # Example:
   #
   # @todo Needs example.
-  exclude: [  ]
+  exclude: []
 
 # -----------------------------------------------------------------------------
 # ADMIN THEME
@@ -141,4 +141,6 @@ theme_default: ''
 # Example:
 #
 # @todo Needs example.
-post_install_redirect: ''
+post_install_redirect:
+  path: ''
+  options: []
