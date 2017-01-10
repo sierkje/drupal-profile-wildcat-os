@@ -159,13 +159,9 @@ function wildcat_os_set_theme_settings(array &$install_state) {
     ->set('admin', $install_state['wildcat_theme_admin'])
     ->set('default', $install_state['wildcat_theme_default'])
     ->save(TRUE);
-
-  if (\Drupal::moduleHandler()->moduleExists('node')) {
-    // Enable the admin theme for node add/edit/etc.
-    $config_factory->getEditable('node.settings')
-      ->set('use_admin_theme', TRUE)
-      ->save(TRUE);
-  }
+  $config_factory->getEditable('node.settings')
+    ->set('use_admin_theme', TRUE)
+    ->save(TRUE);
 }
 
 /**
