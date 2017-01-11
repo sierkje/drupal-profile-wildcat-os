@@ -78,7 +78,7 @@ function wildcat_os_install_tasks_alter(array &$tasks) {
 function wildcat_os_get_flavor(array &$install_state) {
   /** @var \Drupal\wildcat_os\WildcatOsFlavorInterface $flavor */
   $flavor = \Drupal::service('wildcat_os.flavor');
-  $install_state['wildcat_os_flavor'] = $flavor->get()['modules'];;
+  $install_state['wildcat_os_flavor'] = $flavor->get();
 }
 
 /**
