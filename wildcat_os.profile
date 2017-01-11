@@ -208,6 +208,15 @@ function wildcat_os_install_themes(array &$install_state) {
  *   extender is configured with one.
  */
 function wildcat_os_redirect(array &$install_state) {
+  if (empty($install_state['wildcat_os_flavor']['post_install_redirect'])) {
+    return [
+      '#title' => t('Something went wrong'),
+      'info' => [
+        '#markup' => '<pre>' . var_export($install_state, TRUE) . '</pre>',
+      ],
+    ];
+
+  }
   $redirect = $install_state['wildcat_os_flavor']['post_install_redirect'];
   $redirect['path'] = "internal:/{$redirect['path']}";
   $link_text = t('you can proceed to your site now');
