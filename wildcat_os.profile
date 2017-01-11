@@ -200,11 +200,16 @@ function wildcat_os_install_themes(array &$install_state) {
     install_profile_themes($install_state);
   }
 
+  // Install optional config.
+  \Drupal::service('config.installer')->installOptionalConfig();
+
   if (\Drupal::moduleHandler()->moduleExists('node')) {
     \Drupal::configFactory()->getEditable('node.settings')
       ->set('use_admin_theme', TRUE)
       ->save(TRUE);
   }
+
+
 }
 
 /**
