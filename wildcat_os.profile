@@ -63,7 +63,7 @@ function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
     if (!in_array($key, [$require_key, $recommend_key, $theme_key])) {
       $sorted_tasks[$key] = $task;
     }
-    if ($key === 'install_profile') {
+    if ($key === 'install_install_profile') {
       $sorted_tasks[$require_key] = $tasks[$require_key];
       $sorted_tasks[$recommend_key] = $tasks[$recommend_key];
       $sorted_tasks[$theme_key] = $tasks[$theme_key];
