@@ -251,7 +251,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     // Process the found definition.
     if (!empty($raw)) {
       // Only pass on 'base_flavor' if it is a non-empty string.
-      if (empty($raw['base_flavor']) && is_string($raw['base_flavor'])) {
+      if (!empty($raw['base_flavor']) && is_string($raw['base_flavor'])) {
         $flavor['base_flavor'] = $raw['base_flavor'];
       }
 
