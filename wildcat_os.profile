@@ -220,45 +220,25 @@ function wildcat_os_install_themes(array &$install_state) {
 function wildcat_os_redirect(array &$install_state) {
   $redirect = $install_state['wildcat_os_flavor']['post_install_redirect'];
   $redirect['path'] = "internal:/{$redirect['path']}";
-  $link_text = t('you can proceed to your site now');
-  $link_url = Url::fromUri($redirect['path'], (array) $redirect['options']);
+  $proceed_text = t('You can proceed to your site now');
+  $proceed_url = Url::fromUri($redirect['path'], $redirect['options']);
   // Explicitly set the base URL, if not previously set, to prevent weird
   // redirection snafus.
-  $base_url = $link_url->getOption('base_url');
-  if (empty($base_url)) {
-    $link_url->setOption('base_url', $GLOBALS['base_url']);
+  if (empty($proceed_url->getOption('base_url'))) {
+    $proceed_url->setOption('base_url', $GLOBALS['base_url']);
   }
-  $link_url->setAbsolute(TRUE);
-
-  // The installer doesn't make it easy (possible?) to return a redirect
-  // response, so set a redirection META tag in the output.
-  $redirect_meta = [
-    '#tag' => 'meta',
-    '#attributes' => [
-      'http-equiv' => 'refresh',
-      'content' => "0;url={$link_url->toString()}",
-    ],
-  ];
+  $proceed_url->setAbsolute(TRUE);
+  $proceed = Link::fromTextAndUrl($proceed_text, $proceed_url)->toString();
 
   return [
     '#title' => t('Start organizing!'),
     'info' => [
       '#prefix' => '<p>',
       '#suffix' => '</p>',
-      '#markup' => t('Your <em>@wildcat</em> site is ready to go!', [
+      '#markup' => t('Your site is ready to go! @proceed.', [
         '@wildcat' => 'Wildcat-flavored',
+        '@proceed' => $proceed,
       ]),
-    ],
-    'proceed_link' => [
-      '#prefix' => '<p>',
-      '#suffix' => '</p>',
-      '#markup' => t('If you are not redirected in 5 seconds, @proceed_link.', [
-        '@proceed_link' => Link::fromTextAndUrl($link_text, $link_url),
-      ]),
-      '#attached' => [
-        'http_header' => [['Cache-Control', 'no-cache']],
-        'html_head' => [[$redirect_meta, 'meta_redirect']],
-      ],
     ],
   ];
 }

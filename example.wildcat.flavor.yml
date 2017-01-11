@@ -144,3 +144,6 @@ theme_default: ''
 post_install_redirect:
   path: ''
   options: []
+
+# @todo Needs documentation.
+install_mode: ''

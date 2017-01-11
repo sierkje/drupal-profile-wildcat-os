@@ -76,9 +76,6 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
    *
    * @return array
    *   The array containing the flavor definition.
-   *
-   * @throws BadFlavorException
-   *   When a wildcat.flavor.yml file was found but could not be processed.
    */
   protected function discoverFlavor() {
     // There can be up to two files with overrides for each site:
@@ -95,6 +92,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     $base = strtolower($install['base_flavor']) ?: $base;
     // But use the base flavor from the 'site' file, if there is one.
     $base = strtolower($site['base_flavor']) ?: $base;
+    $base = $this->getBaseFlavor($base);
 
     // Add the wildcat module to the requires, it is always required.
     $require = ['wildcat'];
@@ -104,17 +102,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     $require = array_merge($require, $site['modules']['require']);
 
     // Add base flavor modules to the recommends.
-    $recommend = ($base === 'minimal') ? [] : [
-      'wildcat_content_role',
-      'wildcat_landing_page',
-      'wildcat_layout',
-      'wildcat_media',
-      'wildcat_media_document',
-      'wildcat_media_image',
-      'wildcat_media_instagram',
-      'wildcat_media_twitter',
-      'wildcat_media_video',
-    ];
+    $recommend = $base['modules'];
     // Add modules recommended in the 'installation' file to the recommends.
     $recommend = array_merge($recommend, $install['modules']['recommend']);
     // Add modules recommended in the 'site' file to the recommends.
@@ -127,29 +115,41 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     $recommend = array_diff($recommend, $require);
 
     // Use, by default, 'seven' as the admin theme.
-    $theme_admin = 'seven';
+    $theme_admin = $base['theme_admin'];
     // But use the admin theme from the 'installation' file, if there is one.
     $theme_admin = $install['theme_admin'] ?: $theme_admin;
     // But use the admin theme from the 'site' file, if there is one.
     $theme_admin = $site['theme_admin'] ?: $theme_admin;
 
     // Use, by default, 'float_left' as the default theme.
-    $theme_default = 'float_left';
+    $theme_default = $base['$theme_default'];
+    // But use the default theme from the 'installation' file, if there is one.
+    $theme_default = $install['theme_default'] ?: $theme_default;
     // But use the default theme from the 'site' file, if there is one.
     $theme_default = $site['theme_default'] ?: $theme_default;
 
     // Use, as default, the front page as the post installation redirect.
     $redirect = [
-      'path' => '<front>',
+      'path' =>  $base['post_install_redirect_path'],
       'options' => [],
     ];
     // But use the redirect from the 'installation' file, if there is one.
-    if (!empty($install['post_install_redirect'])) {
+    if (!empty($install['post_install_redirect']['path'])) {
       $redirect = $install['post_install_redirect'];
     }
     // But use the redirect from the 'site' file, if there is one.
-    if (!empty($site['post_install_redirect'])) {
+    if (!empty($site['post_install_redirect']['path'])) {
       $redirect = $site['post_install_redirect'];
+    }
+
+    $install_mode = $base['install_mode'];
+    // But use the redirect from the 'installation' file, if there is one.
+    if (!empty($install['install_mode']) && is_string($install['install_mode'])) {
+      $install_mode = $install['install_mode'];
+    }
+    // But use the redirect from the 'site' file, if there is one.
+    if (!empty($site['install_mode']) && is_string($site['install_mode'])) {
+      $install_mode = $site['install_mode'];
     }
 
     return [
@@ -160,39 +160,43 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
       'theme_admin' => $theme_admin,
       'theme_default' => $theme_default,
       'post_install_redirect' => $redirect,
+      'install_mode' => $install_mode,
     ];
   }
 
   /**
-   * Parses a wildcat.flavor.yml file and returns its flavor definition.
+   * Returns the base flavor definition.
    *
-   * @param $dir
-   *   The full path to the folder containing the wildcat.flavor.yml file.
+   * @param string $base
+   *   The name of the base flavor. (If the given base flavor does not exist,
+   *   the standard base flavor is used.)
    *
    * @return array
-   *   An array containing the definition found in the wildcat.flavor.yml file.
-   *   If the wildcat.flavor.yml does not exist an empty array is returned.
-   *
-   * @throws BadFlavorException
-   *   When a wildcat.flavor.yml file was found but could not be processed.
+   *   An array containing the definition.
    */
-  protected function loadFlavorFile($dir) {
-    $flavor = [
-      'base_flavor' => '',
-      'modules' => [
-        'require' => [],
-        'recommend' => [],
-        'exclude' => [],
-      ],
-      'theme_admin' => '',
-      'theme_default' => '',
-      'post_install_redirect' => [
-        'path' => '',
-        'options' => '',
-      ],
-    ];
+  protected function getBaseFlavor($base) {
+    $base = ($base === 'minimal') ? 'minimal' : 'standard';
+    $filename = dirname(dirname(__DIR__)) . "/wildcat.base_flavor.{$base}.yml";
 
-    $filename = (string) $dir . '/wildcat.flavor.yml';
+    return $this->loadYaml($filename);
+  }
+
+  /**
+   * Returns the decoded YAML from a file.
+   *
+   * @param string $filename
+   *   The name and path of the file that needs to be decoded.
+   *
+   * @return mixed
+   *   An array containing the decoded data. If the file was not found an empty
+   *   array is returned.
+   *
+   * @throws \Drupal\wildcat_os\Exception\BadFlavorException
+   *   When the file was found but could not be processed.
+   */
+  protected function loadYaml($filename) {
+    $yaml = [];
+
     if (file_exists($filename)) {
       // Load and read the file.
       $file_contents = file_get_contents($filename);
@@ -204,64 +208,100 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
       // If the file is not empty, try to decode the YAML.
       if (!empty($file_contents)) {
         try {
-          $raw = (array) Yaml::decode($file_contents);
+          $yaml = (array) Yaml::decode($file_contents);
         }
         catch (\Exception $e) {
           $msg = "Found {$filename}, but could not parse YAML.";
           throw new BadFlavorException($msg, $e->getCode(), $e);
         }
       }
+    }
 
-      // Process the found definition.
-      if (!empty($raw)) {
-        // Only pass on 'base_flavor' if it is a non-empty string.
-        if (empty($raw['base_flavor']) && is_string($raw['base_flavor'])) {
-          $flavor['base_flavor'] = $raw['base_flavor'];
-        }
+    return $yaml;
+  }
 
-        // Pass on required, recommended, and exclude modules.
-        if (!empty($raw['modules']) && is_array($raw['modules'])) {
-          $find_modules = function ($modules) {
-            // Ignore this entry completely when it is not an array.
-            if (!is_array($modules)) {
-              return [];
-            }
+  /**
+   * Parses a wildcat.flavor.yml file and returns its flavor definition.
+   *
+   * @param $dir
+   *   The full path to the folder containing the wildcat.flavor.yml file.
+   *
+   * @return array
+   *   An array containing the definition found in the wildcat.flavor.yml file.
+   *   If the wildcat.flavor.yml does not exist an empty array is returned.
+   */
+  protected function loadFlavorFile($dir) {
+    $raw = $this->loadYaml((string) $dir . '/wildcat.flavor.yml');
+    $flavor = [
+      'base_flavor' => '',
+      'modules' => [
+        'require' => [],
+        'recommend' => [],
+        'exclude' => [],
+      ],
+      'theme_admin' => '',
+      'theme_default' => '',
+      'post_install_redirect' => [
+        'path' => '',
+        'options' => [],
+      ],
+      'install_mode' => '',
+    ];
 
-            // Ignore any array item for this entry that is not a string.
-            return array_filter($modules, function($module) {
-              return is_string($module);
-            });
-          };
+    // Process the found definition.
+    if (!empty($raw)) {
+      // Only pass on 'base_flavor' if it is a non-empty string.
+      if (empty($raw['base_flavor']) && is_string($raw['base_flavor'])) {
+        $flavor['base_flavor'] = $raw['base_flavor'];
+      }
 
-          foreach (['require', 'recommend', 'exclude'] as $type) {
-            if (!empty($raw['modules'][$type])) {
-              $flavor['modules'][$type] = $find_modules($raw['modules'][$type]);
-            }
+      // Pass on required, recommended, and exclude modules.
+      if (!empty($raw['modules']) && is_array($raw['modules'])) {
+        $find_modules = function ($modules) {
+          // Ignore this entry completely when it is not an array.
+          if (!is_array($modules)) {
+            return [];
+          }
+
+          // Ignore any array item for this entry that is not a string.
+          return array_filter($modules, function($module) {
+            return is_string($module);
+          });
+        };
+
+        foreach (['require', 'recommend', 'exclude'] as $type) {
+          if (!empty($raw['modules'][$type])) {
+            $flavor['modules'][$type] = $find_modules($raw['modules'][$type]);
           }
         }
+      }
 
-        // Only pass on 'theme_admin' if it is a non-empty string.
-        if (!empty($raw['theme_admin']) && is_string($raw['theme_admin'])) {
-          $flavor['theme_admin'] = $raw['theme_admin'];
-        }
+      // Only pass on 'theme_admin' if it is a non-empty string.
+      if (!empty($raw['theme_admin']) && is_string($raw['theme_admin'])) {
+        $flavor['theme_admin'] = $raw['theme_admin'];
+      }
 
-        // Only pass on 'theme_default' if it is a non-empty string.
-        if (!empty($raw['theme_default']) && is_string($raw['theme_default'])) {
-          $flavor['theme_default'] = $raw['theme_default'];
-        }
+      // Only pass on 'theme_default' if it is a non-empty string.
+      if (!empty($raw['theme_default']) && is_string($raw['theme_default'])) {
+        $flavor['theme_default'] = $raw['theme_default'];
+      }
 
-        // Only pass on 'post_install_redirect' if it is a non-empty array.
-        if (!empty($raw['post_install_redirect']) && is_array($raw['post_install_redirect'])) {
-          $redirect = $raw['post_install_redirect'];
-          // Only pass on the redirect 'path' if it is a non-empty string.
-          if (!empty($redirect['path']) && is_string($redirect['path'])) {
-            $flavor['post_install_redirect']['path'] = $redirect['path'];
-          }
-          // Only pass on the redirect 'options' if it is a non-empty array.
-          if (!empty($redirect['options']) && is_array($redirect['options'])) {
-            $flavor['post_install_redirect']['options'] = $redirect['options'];
-          }
+      // Only pass on 'post_install_redirect' if it is a non-empty array.
+      if (!empty($raw['post_install_redirect']) && is_array($raw['post_install_redirect'])) {
+        $redirect = $raw['post_install_redirect'];
+        // Only pass on the redirect 'path' if it is a non-empty string.
+        if (!empty($redirect['path']) && is_string($redirect['path'])) {
+          $flavor['post_install_redirect']['path'] = $redirect['path'];
         }
+        // Only pass on the redirect 'options' if it is a non-empty array.
+        if (!empty($redirect['options']) && is_array($redirect['options'])) {
+          $flavor['post_install_redirect']['options'] = $redirect['options'];
+        }
+      }
+
+      // Only pass on the 'install_mode' if it is a non-empty string.
+      if (!empty($raw['install_mode']) && is_string($raw['install_mode'])) {
+        $flavor['install_mode'] = $raw['install_mode'];
       }
     }
 
