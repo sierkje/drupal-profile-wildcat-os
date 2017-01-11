@@ -17,20 +17,20 @@ use Drupal\Core\Url;
 function wildcat_os_install_tasks() {
   return [
     'wildcat_os_get_flavor' => [
-      'display' => FALSE,
+      'display' => TRUE,
     ],
     'wildcat_os_install_required_modules' => [
       'display_name' => t('Adding flavor'),
-      'display' => FALSE,
+      'display' => TRUE,
       'type' => 'batch',
     ],
     'wildcat_os_install_recommended_modules' => [
-      'display_name' => t('Adding flavor'),
-      'display' => FALSE,
+      'display_name' => t('Adding more flavor'),
+      'display' => TRUE,
       'type' => 'batch',
     ],
     'wildcat_os_install_themes' => [
-      'display' => FALSE,
+      'display' => TRUE,
     ],
   ];
 }
@@ -39,14 +39,6 @@ function wildcat_os_install_tasks() {
  * Implements hook_install_tasks_alter().
  */
 function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
-  if (!empty($install_state['wildcat_os_flavor']['modules']['require'])) {
-    $tasks['wildcat_os_install_required_modules']['display'] = TRUE;
-    $tasks['wildcat_os_install_recommended_modules']['display_name'] = t('Adding more flavor');
-  }
-  if (!empty($install_state['wildcat_os_flavor']['modules']['recommend'])) {
-    $tasks['wildcat_os_install_recommended_modules']['display'] = TRUE;
-  }
-
   // We do not know the themes yet when Drupal wants to install them, so we need
   // to do this later.
   $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
@@ -58,14 +50,16 @@ function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
 
   // Install flavor modules and themes immediately after profile is installed.
   $sorted_tasks = [];
-  $module_key = 'wildcat_os_install_modules';
+  $require_key = 'wildcat_os_install_required_modules';
+  $recommend_key = 'wildcat_os_install_recommended_modules';
   $theme_key = 'wildcat_os_install_themes';
   foreach ($tasks as $key => $task) {
-    if (!in_array($key, [$module_key, $theme_key])) {
+    if (!in_array($key, [$require_key, $recommend_key, $theme_key])) {
       $sorted_tasks[$key] = $task;
     }
     if ($key === 'install_profile') {
-      $sorted_tasks[$module_key] = $tasks[$module_key];
+      $sorted_tasks[$require_key] = $tasks[$require_key];
+      $sorted_tasks[$recommend_key] = $tasks[$recommend_key];
       $sorted_tasks[$theme_key] = $tasks[$theme_key];
     }
   }
