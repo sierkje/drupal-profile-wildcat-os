@@ -17,20 +17,20 @@ use Drupal\Core\Url;
 function wildcat_os_install_tasks() {
   return [
     'wildcat_os_get_flavor' => [
-      'display' => TRUE,
+      'display' => FALSE,
     ],
     'wildcat_os_install_required_modules' => [
-      'display_name' => t('Adding flavor'),
-      'display' => TRUE,
+      'display_name' => t('Adding some flavor'),
+      'display' => FALSE,
       'type' => 'batch',
     ],
     'wildcat_os_install_recommended_modules' => [
-      'display_name' => t('Adding more flavor'),
-      'display' => TRUE,
+      'display_name' => t('Adding some flavor'),
+      'display' => FALSE,
       'type' => 'batch',
     ],
     'wildcat_os_install_themes' => [
-      'display' => TRUE,
+      'display' => FALSE,
     ],
   ];
 }
@@ -39,6 +39,17 @@ function wildcat_os_install_tasks() {
  * Implements hook_install_tasks_alter().
  */
 function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
+  if (isset($install_state['wildcat_os_flavor'])) {
+    $flavor = $install_state['wildcat_os_flavor'];
+    if (!empty($flavor['modules']['require'])) {
+      $tasks['wildcat_os_install_required_modules']['display'] = TRUE;
+      $tasks['wildcat_os_install_recommended_modules']['display_name'] = t('Adding some more flavor');
+    }
+    if (!empty($flavor['modules']['recommend'])) {
+      $tasks['wildcat_os_install_recommended_modules']['display'] = TRUE;
+    }
+  }
+
   // We do not know the themes yet when Drupal wants to install them, so we need
   // to do this later.
   $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
