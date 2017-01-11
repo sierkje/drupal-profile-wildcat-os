@@ -14,19 +14,26 @@ use Drupal\Core\Url;
 /**
  * Implements hook_install_tasks().
  */
-function wildcat_os_install_tasks() {
+function wildcat_os_install_tasks(&$install_state) {
+  $has_required = !empty($install_state['wildcat_os_flavor']['modules']['require']);
+  $has_recommended = !empty($install_state['wildcat_os_flavor']['modules']['recommend']);
+  $require_title =  t('Adding some flavor');
+  $recommend_title = $has_required ? t('Adding more flavor') : $require_title;
+
   return [
     'wildcat_os_get_flavor' => [
       'display' => FALSE,
     ],
     'wildcat_os_install_required_modules' => [
-      'display_name' => t('Adding some flavor'),
-      'display' => FALSE,
+      'display_name' => $require_title,
+      'display' => $has_required,
+      'run' => $has_required ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
       'type' => 'batch',
     ],
     'wildcat_os_install_recommended_modules' => [
-      'display_name' => t('Adding some flavor'),
-      'display' => FALSE,
+      'display_name' => $recommend_title,
+      'display' => $has_recommended,
+      'run' => $has_recommended ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
       'type' => 'batch',
     ],
     'wildcat_os_install_themes' => [
@@ -39,16 +46,6 @@ function wildcat_os_install_tasks() {
  * Implements hook_install_tasks_alter().
  */
 function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
-  if (isset($install_state['wildcat_os_flavor'])) {
-    $flavor = $install_state['wildcat_os_flavor'];
-    if (!empty($flavor['modules']['require'])) {
-      $tasks['wildcat_os_install_required_modules']['display'] = TRUE;
-      $tasks['wildcat_os_install_recommended_modules']['display_name'] = t('Adding some more flavor');
-    }
-    if (!empty($flavor['modules']['recommend'])) {
-      $tasks['wildcat_os_install_recommended_modules']['display'] = TRUE;
-    }
-  }
 
   // We do not know the themes yet when Drupal wants to install them, so we need
   // to do this later.
@@ -56,8 +53,10 @@ function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
   $tasks['install_profile_themes']['display'] = FALSE;
 
 
-  // Use a custom redirect callback, in case a custom redirect is specified.
-  $tasks['install_finished']['function'] = 'wildcat_os_redirect';
+  if (isset($install_state['wildcat_os_flavor']['post_install_redirect'])) {
+    // Use a custom redirect callback, in case a custom redirect is specified.
+    $tasks['install_finished']['function'] = 'wildcat_os_redirect';
+  }
 
   // Install flavor modules and themes immediately after profile is installed.
   $sorted_tasks = [];
@@ -219,26 +218,17 @@ function wildcat_os_install_themes(array &$install_state) {
  *   extender is configured with one.
  */
 function wildcat_os_redirect(array &$install_state) {
-  if (empty($install_state['wildcat_os_flavor']['post_install_redirect'])) {
-    return [
-      '#title' => t('Something went wrong'),
-      'info' => [
-        '#markup' => '<pre>' . var_export($install_state, TRUE) . '</pre>',
-      ],
-    ];
-
-  }
   $redirect = $install_state['wildcat_os_flavor']['post_install_redirect'];
   $redirect['path'] = "internal:/{$redirect['path']}";
   $link_text = t('you can proceed to your site now');
-  $link_url = Url::fromUri($redirect['path'], $redirect['options']);
-
+  $link_url = Url::fromUri($redirect['path'], (array) $redirect['options']);
   // Explicitly set the base URL, if not previously set, to prevent weird
   // redirection snafus.
   $base_url = $link_url->getOption('base_url');
   if (empty($base_url)) {
     $link_url->setOption('base_url', $GLOBALS['base_url']);
   }
+  $link_url->setAbsolute(TRUE);
 
   // The installer doesn't make it easy (possible?) to return a redirect
   // response, so set a redirection META tag in the output.
