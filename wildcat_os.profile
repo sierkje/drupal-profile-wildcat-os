@@ -93,6 +93,9 @@ function wildcat_os_get_flavor(array &$install_state) {
  *   The batch definition.
  */
 function wildcat_os_install_required_modules(array &$install_state) {
+  if (empty($install_state['wildcat_os_flavor']['modules']['require'])) {
+    return [];
+  }
   $modules = $install_state['wildcat_os_flavor']['modules']['require'];
 
   return _wildcat_os_install_modules($modules, $install_state);
@@ -110,6 +113,9 @@ function wildcat_os_install_required_modules(array &$install_state) {
  *   The batch definition.
  */
 function wildcat_os_install_recommended_modules(array &$install_state) {
+  if (empty($install_state['wildcat_os_flavor']['modules']['recommend'])) {
+    return [];
+  }
   $modules = $install_state['wildcat_os_flavor']['modules']['recommend'];
 
   return _wildcat_os_install_modules($modules, $install_state);
