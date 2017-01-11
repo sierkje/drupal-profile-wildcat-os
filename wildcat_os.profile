@@ -15,25 +15,19 @@ use Drupal\Core\Url;
  * Implements hook_install_tasks().
  */
 function wildcat_os_install_tasks(&$install_state) {
-  $has_required = !empty($install_state['wildcat_os_flavor']['modules']['require']);
-  $has_recommended = !empty($install_state['wildcat_os_flavor']['modules']['recommend']);
-  $require_title =  t('Adding some flavor');
-  $recommend_title = $has_required ? t('Adding more flavor') : $require_title;
-
   return [
     'wildcat_os_get_flavor' => [
-      'display' => FALSE,
+      'display_name' => 'Pick the flavor',
+      'display' => TRUE,
     ],
     'wildcat_os_install_required_modules' => [
-      'display_name' => $require_title,
-      'display' => $has_required,
-      'run' => $has_required ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
+      'display_name' => t('Add some flavor'),
+      'display' => TRUE,
       'type' => 'batch',
     ],
     'wildcat_os_install_recommended_modules' => [
-      'display_name' => $recommend_title,
-      'display' => $has_recommended,
-      'run' => $has_recommended ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
+      'display_name' => t('Add more flavor'),
+      'display' => TRUE,
       'type' => 'batch',
     ],
     'wildcat_os_install_themes' => [
@@ -56,6 +50,8 @@ function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
   if (isset($install_state['wildcat_os_flavor']['post_install_redirect'])) {
     // Use a custom redirect callback, in case a custom redirect is specified.
     $tasks['install_finished']['function'] = 'wildcat_os_redirect';
+    $tasks['install_finished']['display_name'] = 'Install complete';
+    $tasks['install_finished']['display'] = TRUE;
   }
 
   // Install flavor modules and themes immediately after profile is installed.
