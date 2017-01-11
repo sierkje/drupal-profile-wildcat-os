@@ -15,19 +15,25 @@ use Drupal\Core\Url;
  * Implements hook_install_tasks().
  */
 function wildcat_os_install_tasks(&$install_state) {
+  $has_required = !empty($install_state['wildcat_os_flavor']['modules']['require']);
+  $has_recommended = !empty($install_state['wildcat_os_flavor']['modules']['recommend']);
+  $require_title =  t('Add some flavor');
+  $recommend_title = $has_required ? t('Add some more flavor') : $require_title;
+
   return [
     'wildcat_os_get_flavor' => [
-      'display_name' => 'Pick the flavor',
-      'display' => TRUE,
+      'display' => FALSE,
     ],
     'wildcat_os_install_required_modules' => [
-      'display_name' => t('Add some flavor'),
-      'display' => TRUE,
+      'display_name' => $require_title,
+      'display' => $has_required,
+      'run' => $has_required ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
       'type' => 'batch',
     ],
     'wildcat_os_install_recommended_modules' => [
-      'display_name' => t('Add more flavor'),
-      'display' => TRUE,
+      'display_name' => $recommend_title,
+      'display' => $has_recommended,
+      'run' => $has_recommended ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
       'type' => 'batch',
     ],
     'wildcat_os_install_themes' => [
@@ -40,7 +46,6 @@ function wildcat_os_install_tasks(&$install_state) {
  * Implements hook_install_tasks_alter().
  */
 function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
-
   // We do not know the themes yet when Drupal wants to install them, so we need
   // to do this later.
   $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
