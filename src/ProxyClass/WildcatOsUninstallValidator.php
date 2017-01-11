@@ -10,7 +10,7 @@ namespace Drupal\wildcat_os\ProxyClass {
     /**
      * Provides a proxy class for \Drupal\wildcat_os\WildcatOsUninstallValidator.
      *
-     * @see \Drupal\Component\ProxyBuilder
+     * @see \Drupal\Component\ProxyBuilder\ProxyBuilder
      */
     class WildcatOsUninstallValidator implements \Drupal\Core\Extension\ModuleUninstallValidatorInterface
     {

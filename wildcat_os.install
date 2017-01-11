@@ -76,7 +76,7 @@ function wildcat_os_install() {
 
   // Set defaults for the Shortcut modules, if it is installed.
   if (\Drupal::moduleHandler()->moduleExists('shortcut')) {
-    // Allow authenticated users to use shortcuts.;
+    // Allow authenticated users to use shortcuts.
     $role_authenticated
       ->grantPermission('access shortcuts');
 
@@ -101,7 +101,7 @@ function wildcat_os_install() {
 
   // Set defaults for the Search modules, if it is installed.
   if (\Drupal::moduleHandler()->moduleExists('search')) {
-    // Allow all users to use search.;
+    // Allow all users to use search.
     $role_anonymous
       ->grantPermission('search content');
     $role_authenticated

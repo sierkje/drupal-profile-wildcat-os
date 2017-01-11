@@ -61,7 +61,9 @@ class WildcatOsUninstallValidator implements ModuleUninstallValidatorInterface {
 
     if (in_array($module, $this->flavorManager->get()['modules']['require'])) {
       $name = $this->moduleHandler->getName($module);
-      $reasons[] = $this->t("{$name} is required by Wildcat OS, uninstalling this module is not allowed.");
+      $reasons[] = $this->t('@name is required by Wildcat OS, uninstalling this module is not allowed.', [
+        '@name' => $name,
+      ]);
     }
 
     return $reasons;

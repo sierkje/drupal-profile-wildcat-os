@@ -14,15 +14,15 @@ use Drupal\Core\Url;
 /**
  * Implements hook_install_tasks().
  */
-function wildcat_os_install_tasks(&$install_state) {
+function wildcat_os_install_tasks() {
   $run_task = INSTALL_TASK_RUN_IF_NOT_COMPLETED;
   $skip_task = INSTALL_TASK_SKIP;
-  $modules = $install_state['wildcat_os_flavor']['modules'] ?? [];
+  $flavor = \Drupal::state()->get('wildcat_os.flavor') ?: [];
 
-  $require_title =  t('Add some flavor');
-  $has_required = !empty(['modules']['require']);
+  $require_title = t('Add some flavor');
+  $has_required = !empty($flavor['modules']['require']);
   $recommend_title = $has_required ? t('Add some more flavor') : $require_title;
-  $has_recommended = !empty($modules['recommend']);
+  $has_recommended = !empty($flavor['modules']['recommend']);
 
   return [
     'wildcat_os_get_flavor' => [
@@ -36,7 +36,7 @@ function wildcat_os_install_tasks(&$install_state) {
     ],
     'wildcat_os_install_recommended_modules' => [
       'display_name' => $recommend_title,
-      'display' => $has_recommended,
+      'display' => TRUE,
       'run' => $has_recommended ? $run_task : $skip_task,
       'type' => 'batch',
     ],
@@ -54,7 +54,6 @@ function wildcat_os_install_tasks_alter(array &$tasks) {
   // to do this later.
   $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
   $tasks['install_profile_themes']['display'] = FALSE;
-
 
   // Use a custom redirect callback, in case a custom redirect is specified.
   $tasks['install_finished'] = [
@@ -88,14 +87,11 @@ function wildcat_os_install_tasks_alter(array &$tasks) {
  * Install task callback.
  *
  * Collects the flavor information.
- *
- * @param array $install_state
- *   The current install state.
  */
-function wildcat_os_get_flavor(array &$install_state) {
+function wildcat_os_get_flavor() {
   /** @var \Drupal\wildcat_os\WildcatOsFlavorInterface $flavor */
   $flavor = \Drupal::service('wildcat_os.flavor');
-  $install_state['wildcat_os_flavor'] = $flavor->get();
+  $flavor->get(TRUE);
 }
 
 /**
@@ -110,12 +106,11 @@ function wildcat_os_get_flavor(array &$install_state) {
  *   The batch definition.
  */
 function wildcat_os_install_required_modules(array &$install_state) {
-  if (empty($install_state['wildcat_os_flavor']['modules']['require'])) {
+  if (!$flavor = \Drupal::state()->get('wildcat_os.flavor')) {
     return [];
   }
 
-  $modules = $install_state['wildcat_os_flavor']['modules']['require'];
-
+  $modules = $flavor['modules']['require'];
   $batch = _wildcat_os_install_modules($modules, $install_state);
   $batch['title'] = t('Adding flavor: installing required modules');
 
@@ -134,12 +129,11 @@ function wildcat_os_install_required_modules(array &$install_state) {
  *   The batch definition.
  */
 function wildcat_os_install_recommended_modules(array &$install_state) {
-  if (empty($install_state['wildcat_os_flavor']['modules']['recommend'])) {
+  if (!$flavor = \Drupal::state()->get('wildcat_os.flavor')) {
     return [];
   }
 
-  $modules = $install_state['wildcat_os_flavor']['modules']['recommend'];
-
+  $modules = $flavor['modules']['recommend'];
   $batch = _wildcat_os_install_modules($modules, $install_state);
   $batch['title'] = t('Adding flavor: installing recommended modules');
 
@@ -170,7 +164,7 @@ function _wildcat_os_install_modules(array $modules, &$install_state) {
 
   $installed_modules = \Drupal::config('core.extension')->get('module') ?: [];
   // Do not pass on already installed modules.
-  $modules = array_filter($modules, function($module) use ($installed_modules) {
+  $modules = array_filter($modules, function ($module) use ($installed_modules) {
     return !isset($installed_modules[$module]);
   });
   \Drupal::state()->set('install_profile_modules', $modules);
@@ -187,19 +181,19 @@ function _wildcat_os_install_modules(array $modules, &$install_state) {
  *   The current install state.
  */
 function wildcat_os_install_themes(array &$install_state) {
-  $theme_admin = $install_state['wildcat_os_flavor']['theme_admin'];
-  $theme_default = $install_state['wildcat_os_flavor']['theme_default'];
-  if (!empty($theme_admin) || !empty($theme_default)) {
+  if (!$flavor = \Drupal::state()->get('wildcat_os.flavor')) {
+    return;
+  }
+
+  if (!empty($flavor['theme_admin']) || !empty($flavor['theme_default'])) {
     $theme_config = \Drupal::configFactory()->getEditable('system.theme');
+    $install_state['profile_info']['themes'] = [];
 
-    if (!empty($theme_admin)) {
-      $install_state['profile_info']['themes'][] = $theme_admin;
-      $theme_config->set('admin', $theme_admin);
-    }
-
-    if (!empty($theme_default)) {
-      $install_state['profile_info']['themes'][] = $theme_default;
-      $theme_config->set('default', $theme_default);
+    foreach (['theme_admin', '$theme_default'] as $theme) {
+      if (!empty($flavor[$theme])) {
+        $install_state['profile_info']['themes'][] = $flavor[$theme];
+        $theme_config->set('admin', $flavor[$theme]);
+      }
     }
 
     $theme_config->save(TRUE);
@@ -218,15 +212,16 @@ function wildcat_os_install_themes(array &$install_state) {
  *
  * Redirects the user to a particular URL after installation.
  *
- * @param array $install_state
- *   The current install state.
- *
  * @return array
  *   A renderable array with a success message and a redirect header, if the
  *   extender is configured with one.
  */
-function wildcat_os_redirect(array &$install_state) {
-  $redirect = $install_state['wildcat_os_flavor']['post_install_redirect'];
+function wildcat_os_redirect() {
+  if (!$flavor = \Drupal::state()->get('wildcat_os.flavor')) {
+    return [];
+  }
+
+  $redirect = $flavor['post_install_redirect'];
   $redirect['path'] = "internal:/{$redirect['path']}";
   $proceed_text = t('You can proceed to your site now');
   $proceed_url = Url::fromUri($redirect['path'], $redirect['options']);

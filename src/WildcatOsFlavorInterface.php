@@ -1,20 +1,9 @@
 <?php
 
-/**
- * @file
- * WildcatOsFlavorInterface.php
- *
- * @todo Add better file description.
- */
 namespace Drupal\wildcat_os;
-
-use Drupal\wildcat_os\Exception\BadFlavorException;
 
 /**
  * Helper class to get information from the wildcat.flavor.yml files.
- *
- * Inspired by Drupal\lightning\Extender in drupal/lightning:
- * http://cgit.drupalcode.org/lightning/tree/src/Extender.php?h=8.x-2.x
  */
 interface WildcatOsFlavorInterface {
 

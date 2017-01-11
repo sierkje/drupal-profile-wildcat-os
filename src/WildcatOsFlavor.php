@@ -8,9 +8,6 @@ use Drupal\wildcat_os\Exception\BadFlavorException;
 
 /**
  * Helper class to get information from the wildcat.flavor.yml files.
- *
- * Inspired by Drupal\lightning\Extender in drupal/lightning:
- * http://cgit.drupalcode.org/lightning/tree/src/Extender.php?h=8.x-2.x
  */
 class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
@@ -130,7 +127,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
 
     // Use, as default, the front page as the post installation redirect.
     $redirect = [
-      'path' =>  $base['post_install_redirect_path'],
+      'path' => $base['post_install_redirect_path'],
       'options' => [],
     ];
     // But use the redirect from the 'installation' file, if there is one.
@@ -223,7 +220,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
   /**
    * Parses a wildcat.flavor.yml file and returns its flavor definition.
    *
-   * @param $dir
+   * @param string $dir
    *   The full path to the folder containing the wildcat.flavor.yml file.
    *
    * @return array
@@ -264,7 +261,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
           }
 
           // Ignore any array item for this entry that is not a string.
-          return array_filter($modules, function($module) {
+          return array_filter($modules, function ($module) {
             return is_string($module);
           });
         };
