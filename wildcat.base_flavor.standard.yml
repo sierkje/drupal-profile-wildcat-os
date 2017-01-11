@@ -41,6 +41,6 @@ modules:
     - views
     - views_ui
 theme_admin: seven
-theme_default: float_left
+theme_default: bartik
 post_install_redirect_path: '<front>'
 install_mode: default
