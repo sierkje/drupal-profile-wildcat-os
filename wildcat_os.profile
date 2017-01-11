@@ -189,10 +189,10 @@ function wildcat_os_install_themes(array &$install_state) {
     $theme_config = \Drupal::configFactory()->getEditable('system.theme');
     $install_state['profile_info']['themes'] = [];
 
-    foreach (['theme_admin', '$theme_default'] as $theme) {
-      if (!empty($flavor[$theme])) {
-        $install_state['profile_info']['themes'][] = $flavor[$theme];
-        $theme_config->set('admin', $flavor[$theme]);
+    foreach (['admin', 'default'] as $theme) {
+      if (!empty($flavor["theme_{$theme}"])) {
+        $install_state['profile_info']['themes'][] = $flavor["theme_{$theme}"];
+        $theme_config->set($theme, $flavor["theme_{$theme}"]);
       }
     }
 
