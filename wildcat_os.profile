@@ -20,20 +20,16 @@ function wildcat_os_install_tasks() {
       'display' => FALSE,
     ],
     'wildcat_os_install_required_modules' => [
-      'display_name' => t('Adding flavor: required modules'),
-      'display' => TRUE,
+      'display_name' => t('Adding flavor'),
+      'display' => FALSE,
       'type' => 'batch',
     ],
     'wildcat_os_install_recommended_modules' => [
-      'display_name' => t('Adding flavor: recommended modules'),
-      'display' => TRUE,
+      'display_name' => t('Adding flavor'),
+      'display' => FALSE,
       'type' => 'batch',
     ],
     'wildcat_os_install_themes' => [
-      'display_name' => t('Adding flavor: themes'),
-      'display' => TRUE,
-    ],
-    'wildcat_os_set_theme_settings' => [
       'display' => FALSE,
     ],
   ];
@@ -42,11 +38,20 @@ function wildcat_os_install_tasks() {
 /**
  * Implements hook_install_tasks_alter().
  */
-function wildcat_os_install_tasks_alter(array &$tasks) {
+function wildcat_os_install_tasks_alter(array &$tasks, $install_state) {
+  if (!empty($install_state['wildcat_os_flavor']['modules']['require'])) {
+    $tasks['wildcat_os_install_required_modules']['display'] = TRUE;
+    $tasks['wildcat_os_install_recommended_modules']['display_name'] = t('Adding more flavor');
+  }
+  if (!empty($install_state['wildcat_os_flavor']['modules']['recommend'])) {
+    $tasks['wildcat_os_install_recommended_modules']['display'] = TRUE;
+  }
+
   // We do not know the themes yet when Drupal wants to install them, so we need
   // to do this later.
   $tasks['install_profile_themes']['run'] = INSTALL_TASK_SKIP;
   $tasks['install_profile_themes']['display'] = FALSE;
+
 
   // Use a custom redirect callback, in case a custom redirect is specified.
   $tasks['install_finished']['function'] = 'wildcat_os_redirect';
@@ -84,7 +89,7 @@ function wildcat_os_get_flavor(array &$install_state) {
 /**
  * Install task callback.
  *
- * Installs flavor modules via a batch process.
+ * Installs flavor required modules via a batch process.
  *
  * @param array $install_state
  *   An array of information about the current installation state.
@@ -96,15 +101,19 @@ function wildcat_os_install_required_modules(array &$install_state) {
   if (empty($install_state['wildcat_os_flavor']['modules']['require'])) {
     return [];
   }
+
   $modules = $install_state['wildcat_os_flavor']['modules']['require'];
 
-  return _wildcat_os_install_modules($modules, $install_state);
+  $batch = _wildcat_os_install_modules($modules, $install_state);
+  $batch['title'] = t('Adding flavor: installing required modules');
+
+  return $batch;
 }
 
 /**
  * Install task callback.
  *
- * Installs flavor modules via a batch process.
+ * Installs flavor recommended modules via a batch process.
  *
  * @param array $install_state
  *   An array of information about the current installation state.
@@ -116,9 +125,13 @@ function wildcat_os_install_recommended_modules(array &$install_state) {
   if (empty($install_state['wildcat_os_flavor']['modules']['recommend'])) {
     return [];
   }
+
   $modules = $install_state['wildcat_os_flavor']['modules']['recommend'];
 
-  return _wildcat_os_install_modules($modules, $install_state);
+  $batch = _wildcat_os_install_modules($modules, $install_state);
+  $batch['title'] = t('Adding flavor: installing recommended modules');
+
+  return $batch;
 }
 
 /**
