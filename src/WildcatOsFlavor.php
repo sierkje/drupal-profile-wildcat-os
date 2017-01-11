@@ -122,7 +122,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     $theme_admin = $site['theme_admin'] ?: $theme_admin;
 
     // Use, by default, 'float_left' as the default theme.
-    $theme_default = $base['$theme_default'];
+    $theme_default = $base['theme_default'];
     // But use the default theme from the 'installation' file, if there is one.
     $theme_default = $install['theme_default'] ?: $theme_default;
     // But use the default theme from the 'site' file, if there is one.
