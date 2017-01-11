@@ -17,7 +17,7 @@ use Drupal\Core\Url;
 function wildcat_os_install_tasks(&$install_state) {
   $run_task = INSTALL_TASK_RUN_IF_NOT_COMPLETED;
   $skip_task = INSTALL_TASK_SKIP;
-  $modules = $install_state['wildcat_os_flavor']['modules'] ?: [];
+  $modules = $install_state['wildcat_os_flavor']['modules'] ?? [];
 
   $require_title =  t('Add some flavor');
   $has_required = !empty(['modules']['require']);
@@ -65,17 +65,20 @@ function wildcat_os_install_tasks_alter(array &$tasks) {
 
   // Install flavor modules and themes immediately after profile is installed.
   $sorted_tasks = [];
-  $require_key = 'wildcat_os_install_required_modules';
-  $recommend_key = 'wildcat_os_install_recommended_modules';
-  $theme_key = 'wildcat_os_install_themes';
+  $wildcat_task_keys = [
+    'wildcat_os_get_flavor',
+    'wildcat_os_install_required_modules',
+    'wildcat_os_install_recommended_modules',
+    'wildcat_os_install_themes',
+  ];
   foreach ($tasks as $key => $task) {
-    if (!in_array($key, [$require_key, $recommend_key, $theme_key])) {
+    if (!in_array($key, $wildcat_task_keys)) {
       $sorted_tasks[$key] = $task;
     }
     if ($key === 'install_install_profile') {
-      $sorted_tasks[$require_key] = $tasks[$require_key];
-      $sorted_tasks[$recommend_key] = $tasks[$recommend_key];
-      $sorted_tasks[$theme_key] = $tasks[$theme_key];
+      foreach ($wildcat_task_keys as $wildcat_task_key) {
+        $sorted_tasks[$wildcat_task_key] = $tasks[$wildcat_task_key];
+      }
     }
   }
   $tasks = $sorted_tasks;
