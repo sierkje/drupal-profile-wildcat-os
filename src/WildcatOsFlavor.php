@@ -176,7 +176,7 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
    */
   protected function getBaseFlavor($base) {
     $base = ($base === 'minimal') ? 'minimal' : 'standard';
-    $filename = dirname(dirname(__DIR__)) . "/wildcat.base_flavor.{$base}.yml";
+    $filename = dirname(__DIR__) . "/wildcat.base_flavor.{$base}.yml";
 
     return $this->loadYaml($filename);
   }
