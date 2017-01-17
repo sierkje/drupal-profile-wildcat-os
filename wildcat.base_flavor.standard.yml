@@ -41,6 +41,7 @@ modules:
     - tour
     - views
     - views_ui
+    - admin_toolbar
 theme_admin: seven
 theme_default: bartik
 post_install_redirect_path: '<front>'
