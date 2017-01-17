@@ -1,15 +1,10 @@
 modules:
   # Core modules:
-  - automated_cron
   - block
   - dblog
   - dynamic_page_cache
   - node
   - page_cache
-  - shortcut
-  - toolbar
-  - tour
-  - views
 theme_admin: seven
 theme_default: float_left
 post_install_redirect_path: '<front>'
