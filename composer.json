@@ -23,6 +23,7 @@
     "drupal/wildcat_content_role": "~0.0",
     "drupal/wildcat_landing_page": "~0.0",
     "drupal/wildcat_layout": "~0.0",
-    "drupal/wildcat_media": "~0.0"
+    "drupal/wildcat_media": "~0.0",
+    "drupal/wildcat_user_admin": "~0.0"
   }
 }

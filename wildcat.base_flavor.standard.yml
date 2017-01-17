@@ -8,6 +8,7 @@ modules:
     - wildcat_media_instagram
     - wildcat_media_twitter
     - wildcat_media_video
+    - wildcat_user_admin
     - automated_cron
     - block
     - block_content
