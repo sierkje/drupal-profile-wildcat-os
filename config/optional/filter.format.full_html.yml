@@ -26,7 +26,7 @@ filters:
     weight: 10
     settings: {  }
 # ----------------------------------------------------------------------------
-# ADDED in wildcat_os_install(), to keep editor dependency optional:
+# ADDED in wildcat_modules_installed(), to keep editor dependency optional:
 # ----------------------------------------------------------------------------
 #  editor_file_reference:
 #    id: editor_file_reference
