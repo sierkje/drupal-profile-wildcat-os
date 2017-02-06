@@ -83,8 +83,8 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
     $install = $this->loadFlavorFile($this->appRoot . '/sites');
     $site = $this->loadFlavorFile($this->sitePath);
 
-    // Use, by default, the 'standard' base flavor.
-    $base = 'standard';
+    // Use, by default, the 'wildcat' base flavor.
+    $base = 'wildcat';
     // But use the base flavor from the 'installation' file, if there is one.
     $base = strtolower($install['base_flavor']) ?: $base;
     // But use the base flavor from the 'site' file, if there is one.
@@ -166,13 +166,15 @@ class WildcatOsFlavor implements WildcatOsFlavorInterface {
    *
    * @param string $base
    *   The name of the base flavor. (If the given base flavor does not exist,
-   *   the standard base flavor is used.)
+   *   the 'wildcat' base flavor is used.)
    *
    * @return array
    *   An array containing the definition.
    */
   protected function getBaseFlavor($base) {
-    $base = ($base === 'minimal') ? 'minimal' : 'standard';
+    if ($base != 'standard' && $base != 'minimal') {
+      $base = 'wildcat';
+    }
     $filename = dirname(__DIR__) . "/wildcat.base_flavor.{$base}.yml";
 
     return $this->loadYaml($filename);

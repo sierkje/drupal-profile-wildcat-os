@@ -16,14 +16,16 @@
 # Optional. Used to specify the name of the base flavor that should be used. The
 # base flavor defines the starting point (modules, themes, and redirect) that
 # should be used for this custom flavor:
-# - currently only 'standard' and 'minimal' are valid as base flavors,
-# - if the base_flavor is not set, or is empty, the 'standard' base flavor will
+# - currently only 'wildcat', 'standard', and 'minimal' are valid as base
+#   flavors,
+# - if the base_flavor is not set, or is empty, the 'wildcat' base flavor will
 #   be used.
 #
 # Examples:
 #
 # base flavor: ''
-#   The default base flavor 'standard' will be used. See below.
+#   The default base flavor 'wildcat' will be used. See below.
+#   @todo: Add documentation.
 #
 # base flavor: 'standard'
 #   If 'standard' is used as the base flavor:

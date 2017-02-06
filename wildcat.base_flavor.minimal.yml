@@ -1,11 +1,11 @@
+# See minimal.info.yml
 modules:
-  # Core modules:
+  - node
   - block
   - dblog
-  - dynamic_page_cache
-  - node
   - page_cache
-theme_admin: seven
-theme_default: float_left
+  - dynamic_page_cache
+theme_admin: stark
+theme_default: stark
 post_install_redirect_path: '<front>'
 install_mode: default

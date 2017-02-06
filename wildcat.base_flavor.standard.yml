@@ -1,50 +1,39 @@
+# See standard.info.yml
 modules:
-  # 'Official' Wildcat' modules:
-  - wildcat_content_role
-  - wildcat_landing_page
-  - wildcat_layout
-  - wildcat_media
-  - wildcat_media_document
-  - wildcat_media_image
-  - wildcat_media_instagram
-  - wildcat_media_twitter
-  - wildcat_media_video
-  - wildcat_user_admin
-  # Core modules:
-  - automated_cron
+  - node
+  - history
   - block
-  - block_content
   - breakpoint
   - ckeditor
+  - color
   - config
-  - contact
+  - comment
   - contextual
-  - datetime
-  - dblog
-  - dynamic_page_cache
-  - editor
-  - field_ui
-  - file
-  - help
-  - history
-  - image
+  - contact
   - menu_link_content
-  - menu_ui
-  - node
-  - options
-  - page_cache
-  - path
+  - datetime
+  - block_content
   - quickedit
-  - rdf
+  - editor
+  - help
+  - image
+  - menu_ui
+  - options
+  - path
+  - page_cache
+  - dynamic_page_cache
+  - taxonomy
+  - dblog
   - search
   - shortcut
-  - taxonomy
   - toolbar
-  - tour
+  - field_ui
+  - file
+  - rdf
   - views
   - views_ui
-  # Contrib modules:
-  - admin_toolbar
+  - tour
+  - automated_cron
 theme_admin: seven
 theme_default: bartik
 post_install_redirect_path: '<front>'
