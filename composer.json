@@ -14,14 +14,6 @@
   "extra": {
     "branch-alias": {
       "dev-8.x-0.x": "0.0.x-dev"
-    },
-    "drupal-libraries": {
-      "library-directory": "web/libraries",
-      "libraries": [
-        { "name": "dropzone", "package": "enyo/dropzone" },
-        { "name": "imagesloaded", "package": "desandro/imagesloaded" },
-        { "name": "masonry", "package": "desandro/masonry" }
-      ]
     }
   },
   "require": {
@@ -33,10 +25,6 @@
     "drupal/wildcat_landing_page": "~0.0",
     "drupal/wildcat_layout": "~0.0",
     "drupal/wildcat_media": "~0.0",
-    "drupal/wildcat_user_admin": "~0.0",
-    "drupal/drupal-library-installer-plugin": "~0.3",
-    "desandro/imagesloaded": "^4.1.1",
-    "desandro/masonry": "^4.1.1",
-    "enyo/dropzone": "^4.3.0"
+    "drupal/wildcat_user_admin": "~0.0"
   }
 }
