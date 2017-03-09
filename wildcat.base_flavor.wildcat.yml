@@ -1,7 +1,6 @@
 modules:
   # 'Official' Wildcat' modules:
   - wildcat_content_role
-  - wildcat_landing_page
   - wildcat_layout
   - wildcat_media
   - wildcat_media_document
@@ -9,7 +8,6 @@ modules:
   - wildcat_media_instagram
   - wildcat_media_twitter
   - wildcat_media_video
-  - wildcat_user_admin
   # Core modules:
   - automated_cron
   - block
