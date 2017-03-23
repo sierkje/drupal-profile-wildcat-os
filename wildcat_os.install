@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for Wildcat sites.
  */
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
@@ -16,6 +17,31 @@ use Drupal\shortcut\Entity\Shortcut;
  * @todo Move most of this to submodules.
  */
 function wildcat_os_install() {
+  $config_factory = \Drupal::configFactory();
+
+  // Update some UUIDs, to allow for importing config AFTER install.
+  global $config_directories;
+  if ($config_sync_dir = $config_directories[CONFIG_SYNC_DIRECTORY]) {
+    // Create a source storage that reads from sync.
+    $config_file_storage = new FileStorage($config_sync_dir);
+
+    // Match up the site UUIDs.
+    $system_site = $config_file_storage->read('system.site');
+    if (isset($system_site['uuid'])) {
+      $config_factory->getEditable('system.site')
+        ->set('uuid', $system_site['uuid'])
+        ->save();
+    }
+
+    // Match up the default shortcut set UUIDs.
+    $shortcut_set_default = $config_file_storage->read('shortcut.set.default');
+    if (isset($shortcut_set_default['uuid'])) {
+      $config_factory->getEditable('shortcut.set.default')
+        ->set('uuid', $shortcut_set_default['uuid'])
+        ->save();
+    }
+  }
+
   // We will conditionally add permissions for some roles, they should be loaded
   // at the begin of this install hook and should be saved at the end.
   /** @var \Drupal\user\RoleInterface $role_anonymous */
@@ -35,7 +61,7 @@ function wildcat_os_install() {
   $user_one->save();
 
   // Allow visitor account creation with administrative approval.
-  \Drupal::configFactory()->getEditable('user.settings')
+  $config_factory->getEditable('user.settings')
     ->set('register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)
     ->save(TRUE);
 
@@ -64,12 +90,12 @@ function wildcat_os_install() {
   // Set defaults for the Node modules, if it is installed.
   if (\Drupal::moduleHandler()->moduleExists('node')) {
     // Enable the admin theme for node add/edit pages.
-    \Drupal::configFactory()->getEditable('node.settings')
+    $config_factory->getEditable('node.settings')
       ->set('use_admin_theme', TRUE)
       ->save(TRUE);
 
     // Set front wildcat_page to "node".
-    \Drupal::configFactory()->getEditable('system.site')
+    $config_factory->getEditable('system.site')
       ->set('wildcat_page.front', '/node')
       ->save(TRUE);
   }
@@ -99,7 +125,7 @@ function wildcat_os_install() {
     }
   }
 
-  // Set defaults for the Search modules, if it is installed.
+  // Add permissions for the Search modules, if it is installed.
   if (\Drupal::moduleHandler()->moduleExists('search')) {
     // Allow all users to use search.
     $role_anonymous
