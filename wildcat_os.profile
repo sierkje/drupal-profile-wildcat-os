@@ -208,8 +208,6 @@ function wildcat_os_install_themes(array &$install_state) {
       ->set('use_admin_theme', TRUE)
       ->save(TRUE);
   }
-
-
 }
 
 /**
