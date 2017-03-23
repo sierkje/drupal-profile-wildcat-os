@@ -12,4 +12,4 @@ services:
 
   wildcat_os.config_uuid_matcher:
     class: Drupal\wildcat_os\WildcatOsConfigUuidMatcher
-    arguments: ['config.factory', 'config.storage.sync']
+    arguments: ['@config.factory', '@config.storage.sync']
