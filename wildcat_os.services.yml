@@ -9,3 +9,7 @@ services:
       - { name: module_install.uninstall_validator }
     arguments: ['@wildcat_os.flavor', '@module_handler', '@string_translation']
     lazy: true
+
+  wildcat_os.config_uuid_matcher:
+    class: Drupal\wildcat_os\WildcatOsConfigUuidMatcher
+    arguments: ['config.factory', 'config.storage.sync']
