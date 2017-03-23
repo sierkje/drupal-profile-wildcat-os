@@ -2,7 +2,6 @@ services:
   wildcat_os.flavor:
     class: Drupal\wildcat_os\WildcatOsFlavor
     arguments: ['@app.root', '@site.path', '@state']
-    lazy: true
 
   wildcat_os.uninstall_validator:
     class: Drupal\wildcat_os\WildcatOsUninstallValidator
